@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Settings
+  encryptionEnabled Boolean @default(false)
+  
+  // Relations
+  images Image[]
+  notes  Note[]
+  shares Share[]
+
+  @@map("users")
+}
+
+model Image {
+  id          String   @id @default(cuid())
+  userId      String
+  filename    String
+  originalUrl String
+  embeddedUrl String?
+  format      String   // jpeg, png, webp
+  width       Int
+  height      Int
+  size        Int      // bytes
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Privacy settings
+  isPrivate   Boolean @default(true)
+  isPublic    Boolean @default(false)
+  
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes  Note[]
+  tags   Tag[]
+  shares Share[]
+
+  @@map("images")
+}
+
+model Note {
+  id          String   @id @default(cuid())
+  imageId     String
+  userId      String
+  content     String   @db.Text
+  isEncrypted Boolean  @default(false)
+  noteHash    String?  // For integrity checking
+  version     Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Encryption metadata
+  salt        String?
+  iv          String?
+  authTag     String?
+
+  // Relations
+  image    Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  user     User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  versions NoteVersion[]
+
+  @@map("notes")
+}
+
+model NoteVersion {
+  id        String   @id @default(cuid())
+  noteId    String
+  content   String   @db.Text
+  version   Int
+  createdAt DateTime @default(now())
+
+  // Relations
+  note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@map("note_versions")
+}
+
+model Tag {
+  id      String @id @default(cuid())
+  name    String @unique
+  imageId String
+
+  // Relations
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@map("tags")
+}
+
+model Share {
+  id         String    @id @default(cuid())
+  imageId    String
+  userId     String
+  shareToken String    @unique
+  password   String?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  // Relations
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("shares")
+}

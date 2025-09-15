@@ -1,0 +1,29 @@
+{
+  "name": "memoryink-extractor",
+  "version": "1.0.0",
+  "description": "CLI tool to extract embedded notes from MemoryInk images",
+  "main": "dist/index.js",
+  "bin": {
+    "memoryink-extract": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "exiftool-vendored": "^25.0.0",
+    "png-chunks-extract": "^1.0.0",
+    "png-chunk-text": "^1.0.0",
+    "chalk": "^4.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.9.0",
+    "typescript": "^5.2.2",
+    "ts-node": "^10.9.1"
+  },
+  "keywords": ["memoryink", "metadata", "exif", "png", "cli"],
+  "author": "MemoryInk",
+  "license": "MIT"
+}
